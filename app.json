@@ -3,6 +3,7 @@
     "name": "cameo-animated-transition-poc",
     "slug": "cameo-animated-transition-poc",
     "version": "1.0.0",
+    "newArchEnabled": false,
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -12,7 +13,6 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true,
       "bundleIdentifier": "com.sospedra.cameoanimatedtransitionpoc"
     },
     "android": {
@@ -24,6 +24,7 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "plugins": ["expo-video"]
   }
 }

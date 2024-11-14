@@ -1,22 +1,33 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Image } from "expo-image";
 import {
   View,
-  Button,
   StyleSheet,
   FlatList,
   TouchableOpacity,
   useWindowDimensions,
   Text,
+  Easing,
 } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import Animated from "react-native-reanimated";
+import {
+  createNativeStackNavigator,
+  NativeStackScreenProps,
+} from "@react-navigation/native-stack";
+import Animated, {
+  SharedTransition,
+  withSequence,
+  withTiming,
+} from "react-native-reanimated";
 import { ResizeMode, Video } from "expo-av";
 
-const CameoLogo = require("./assets/cameo.png");
+type RootStack = {
+  Home: undefined;
+  Details: { index: number };
+};
+
 const AnimatedImage = Animated.createAnimatedComponent(Image);
-const Stack = createNativeStackNavigator();
+const Stack = createNativeStackNavigator<RootStack>();
 const DATA = [
   {
     id: "madamadam",
@@ -41,7 +52,7 @@ const DATA = [
   },
 ];
 
-function HomeScreen({ navigation }) {
+function HomeScreen({ navigation }: NativeStackScreenProps<RootStack, "Home">) {
   return (
     <View style={s.container}>
       <Text
@@ -82,7 +93,7 @@ function HomeScreen({ navigation }) {
                 bottom: 0,
                 top: 0,
               }}
-              sharedTransitionTag={item.id}
+              sharedTransitionTag={`animation-tag-${item.id}`}
             />
           </TouchableOpacity>
         )}
@@ -90,8 +101,28 @@ function HomeScreen({ navigation }) {
     </View>
   );
 }
+const transition = SharedTransition.custom((values) => {
+  "worklet";
 
-function DetailsScreen({ navigation, route }) {
+  return {
+    height: withTiming(values.targetHeight, { duration: 300 }),
+    width: withTiming(values.targetWidth, { duration: 300 }),
+    originX: withTiming(values.targetOriginX, { duration: 300 }),
+    originY: withSequence(
+      withTiming(values.currentOriginY + 50, {
+        duration: 300,
+        easing: Easing.linear,
+      }),
+      withTiming(values.targetOriginY, {
+        duration: 500,
+        easing: Easing.linear,
+      })
+    ),
+  };
+});
+function DetailsScreen({
+  route,
+}: NativeStackScreenProps<RootStack, "Details">) {
   const { width, height } = useWindowDimensions();
   const { index } = route.params;
   const [isVisible, setIsVisible] = useState(true);
@@ -99,7 +130,7 @@ function DetailsScreen({ navigation, route }) {
 
   return (
     <View style={{ width, height }}>
-      <Video
+      {/* <Video
         style={{ width, height, zIndex: 1 }}
         source={item.video}
         isLooping
@@ -111,7 +142,7 @@ function DetailsScreen({ navigation, route }) {
             setIsVisible(false);
           }
         }}
-      />
+      /> */}
       <AnimatedImage
         source={item.image}
         style={{
@@ -120,8 +151,8 @@ function DetailsScreen({ navigation, route }) {
           position: "absolute",
           zIndex: isVisible ? 2 : -1,
         }}
-        sharedTransitionTag={item.id}
-        resizeMode={ResizeMode.COVER}
+        sharedTransitionTag={`animation-tag-${item.id}`}
+        contentFit="cover"
       />
     </View>
   );
